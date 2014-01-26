@@ -70,4 +70,4 @@ ENV JAVA_HOME /usr/lib/jvm/java-6-oracle
 RUN cd /; rm android-sdk_r22.3-linux.tgz && rm android-ndk-r9c-linux-x86_64.tar.bz2 && rm apache-ant-1.8.4-bin.tar.gz
 
 # Install latest android (19 / 4.4.2) tools and system image.
-RUN echo "y" | android update sdk --no-ui --force --filter platform-tools,android-18,build-tools-19.0.1,sysimg-19
+RUN echo "y" | android update sdk --no-ui --force --filter platform-tools,android-19,build-tools-19.0.1,sysimg-19
