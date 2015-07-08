@@ -40,22 +40,27 @@ RUN cd /tmp ; dpkg-deb -b . /fuse.deb
 RUN cd /tmp ; dpkg -i /fuse.deb
 
 # Install support libraries for 32-bit
-RUN apt-get -y install ia32-libs-multiarch
+#RUN apt-get -y install ia32-libs-multiarch
+#RUN apt-get -y install ia32-libs
 
-# Install android sdk
-RUN wget http://dl.google.com/android/android-sdk_r22.3-linux.tgz
-RUN tar -xvzf android-sdk_r22.3-linux.tgz
-RUN mv android-sdk-linux /usr/local/android-sdk
+ENV ANDROID_SDK_VERSION r24.3.3
+ENV ANDROID_NDK_VERSION r10e
+ENV ANT_VERSION 1.9.6
 
-# Install android ndk
-RUN wget http://dl.google.com/android/ndk/android-ndk-r9c-linux-x86_64.tar.bz2
-RUN tar -xvjf android-ndk-r9c-linux-x86_64.tar.bz2
-RUN mv android-ndk-r9c /usr/local/android-ndk
-
-# Install apache ant
-RUN wget http://archive.apache.org/dist/ant/binaries/apache-ant-1.8.4-bin.tar.gz
-RUN tar -xvzf apache-ant-1.8.4-bin.tar.gz
-RUN mv apache-ant-1.8.4 /usr/local/apache-ant
+# Install android sdk and ndk and ant and remove after install (makes tinier images)
+RUN wget http://dl.google.com/android/android-sdk_${ANDROID_SDK_VERSION}-linux.tgz && \
+	wget http://dl.google.com/android/ndk/android-ndk-${ANDROID_NDK_VERSION}-linux-x86_64.bin && \
+	wget http://archive.apache.org/dist/ant/binaries/apache-ant-${ANT_VERSION}-bin.tar.gz && \
+	tar -xvzf android-sdk_${ANDROID_SDK_VERSION}-linux.tgz && \
+	mv android-sdk-linux /usr/local/android-sdk && \
+	rm android-sdk_${ANDROID_SDK_VERSION}-linux.tgz && \
+	chmod a+x android-ndk-${ANDROID_NDK_VERSION}-linux-x86_64.bin; sync && \
+	./android-ndk-${ANDROID_NDK_VERSION}-linux-x86_64.bin && \
+	mv android-ndk-${ANDROID_NDK_VERSION} /usr/local/android-ndk && \
+	rm android-ndk-${ANDROID_NDK_VERSION}-linux-x86_64.bin && \
+	tar -xvzf apache-ant-${ANT_VERSION}-bin.tar.gz && \
+	mv apache-ant-${ANT_VERSION} /usr/local/apache-ant && \
+	rm apache-ant-${ANT_VERSION}-bin.tar.gz
 
 # Add android tools and platform tools to PATH
 ENV ANDROID_HOME /usr/local/android-sdk
@@ -69,9 +74,6 @@ ENV PATH $PATH:$ANT_HOME/bin
 
 # Export JAVA_HOME variable
 ENV JAVA_HOME /usr/lib/jvm/java-6-oracle
-
-# Remove compressed files.
-RUN cd /; rm android-sdk_r22.3-linux.tgz && rm android-ndk-r9c-linux-x86_64.tar.bz2 && rm apache-ant-1.8.4-bin.tar.gz
 
 # Install latest android (19 / 4.4.2) tools and system image.
 RUN echo "y" | android update sdk --no-ui --force --filter platform-tools,android-19,build-tools-19.0.1,sysimg-19
